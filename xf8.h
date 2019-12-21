@@ -16,13 +16,21 @@ struct xf8 {
     uint8_t slots[];
 };
 
-/* Allocate a new XOR filter for COUNT elements, returns NULL on OOM. */
+/**
+ * Allocate a new XOR filter for COUNT elements, returns NULL on OOM.
+ * This is a simple, flat allocation that is freed using free().
+ */
 struct xf8 *xf8_create(size_t count);
 
-/* Set the filter for the given KEYS, returns 0 on OOM. */
+/**
+ * Set the filter for the given KEYS, returns 0 on OOM.
+ * There MUST NOT be repeated keys.
+ */
 int xf8_populate(struct xf8 *, uint64_t *keys, size_t count);
 
-/* Return non-zero if KEY is probably a member of the XOR filter. */
+/**
+ * Return non-zero if KEY is probably a member of the XOR filter.
+ */
 int xf8_member(const struct xf8 *, uint64_t key);
 
 #endif
