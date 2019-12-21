@@ -43,10 +43,11 @@ static void
 xf8_index(const struct xf8 *xf, fx8uint c[3], uint64_t key)
 {
     size_t len = xf->len / 3;
-    // TODO: avoid division by unknown denominator
-    c[0] = xf8_hash(key + xf->seed*3 + 0)%len + len*0;
-    c[1] = xf8_hash(key + xf->seed*3 + 1)%len + len*1;
-    c[2] = xf8_hash(key + xf->seed*3 + 2)%len + len*2;
+    /* NOTE: This won't work correctly when fx8uint is uint64_t. */
+    for (int i = 0; i < 3; i++) {
+        uint64_t x = (uint32_t)xf8_hash(key + xf->seed*3 + i);
+        c[i] = ((x*len)>>32) + len*i;
+    }
 }
 
 int
