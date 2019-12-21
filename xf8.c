@@ -22,7 +22,6 @@ xf8_create(size_t count)
         xf = malloc(sizeof(struct xf8) + len);
         if (xf) {
             xf->len = len;
-            xf->seed = 0;
         }
     }
     return xf;
