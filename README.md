@@ -8,10 +8,10 @@ The example program is a probabilistic spell checker:
 
 ```
 $ make
-$ ./example </usr/share/dict/words >spelling.db
-$ printf 'hello\nfoobarbaz' | ./example spelling.db
-  Y hello
-  N foobarbaz
+$ tests/example </usr/share/dict/words >spelling.db
+$ printf 'hello\nfoobarbaz' | tests/example spelling.db
+Y hello
+N foobarbaz
 ```
 
 [ref]: https://arxiv.org/abs/1912.08258
