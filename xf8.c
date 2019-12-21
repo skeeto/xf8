@@ -96,12 +96,11 @@ xf8_populate(struct xf8 *xf, uint64_t *keys, size_t count)
         buf + 2*xf->len + count*1,
         buf + 2*xf->len + count*2
     };
-    xf->seed = 0;
 
-    for (;;) {
+    for (xf->seed = 0; ; xf->seed++) {
         /* Initialize all sets to empty. */
         for (size_t i = 0; i < xf->len; i++) {
-            sets[i] = -1;
+            sets[i] = FX8NULL;
         }
 
         /* Fills sets with the keys. */
@@ -169,11 +168,9 @@ xf8_populate(struct xf8 *xf, uint64_t *keys, size_t count)
             break;
         }
 
-        /* Failure, increment seed and try again with a new set of hash
-         * functions. This is unimaginably unlikely to ever overflow, so
-         * don't sweat it.
+        /* Failure. Increment the seed and try again with a new set of
+         * hash functions. This is very unlikely.
          */
-        xf->seed++;
     }
 
     free(buf);
