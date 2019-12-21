@@ -29,6 +29,11 @@ main(int argc, char *argv[])
     uint64_t hashkey = 0x648aaecaca11a629;
 
     if (argc == 1) {
+#ifdef _WIN32
+         /* Set stdout to binary mode. */
+        int _setmode(int, int);
+        _setmode(1, 0x8000);
+#endif
         char buf[4096];
         long count = 0;
         static uint64_t keys[MAXKEYS];

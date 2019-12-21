@@ -65,6 +65,20 @@ main(void)
 {
     int fails = 0;
 
+#ifdef _WIN32
+    /* Best effort enable ANSI escape processing. */
+    void *GetStdHandle(unsigned);
+    int GetConsoleMode(void *, unsigned *);
+    int SetConsoleMode(void *, unsigned);
+    void *handle;
+    unsigned mode;
+    handle = GetStdHandle(-11); /* STD_OUTPUT_HANDLE */
+    if (GetConsoleMode(handle, &mode)) {
+        mode |= 0x0004; /* ENABLE_VIRTUAL_TERMINAL_PROCESSING */
+        SetConsoleMode(handle, mode); /* ignore errors */
+    }
+#endif
+
     for (int i = 13; i <= 22; i++) {
         int level = 0;
         for (int j = 0; j < 8; j++) {
