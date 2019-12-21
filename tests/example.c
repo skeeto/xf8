@@ -7,6 +7,8 @@
 #include <string.h>
 #include "xf8.h"
 
+#define MAXKEYS (1L<<24)
+
 static uint64_t
 hash(const void *buf, size_t len, uint64_t key)
 {
@@ -29,17 +31,25 @@ main(int argc, char *argv[])
     if (argc == 1) {
         char buf[4096];
         long count = 0;
-        static uint64_t keys[1L<<20];
-        while (fgets(buf, sizeof(buf), stdin) && count < 1L<<20) {
+        static uint64_t keys[MAXKEYS];
+        while (fgets(buf, sizeof(buf), stdin) && count < MAXKEYS) {
             size_t len = strcspn(buf, "\r\n");
             keys[count++] = hash(buf, len, hashkey);
         }
 
         struct xf8 *xf = xf8_create(count);
-        xf8_populate(xf, keys, count);
+        if (!xf) {
+            fprintf(stderr, "fatal: out of memory (xf8_create)\n");
+            exit(EXIT_FAILURE);
+        }
+        if (!xf8_populate(xf, keys, count)) {
+            fprintf(stderr, "fatal: out of memory (xf8_populate)\n");
+            exit(EXIT_FAILURE);
+        }
         fputc(count >>  0 & 0xff, stdout);
         fputc(count >>  8 & 0xff, stdout);
         fputc(count >> 16 & 0xff, stdout);
+        fputc(count >> 24 & 0xff, stdout);
         fputc(xf->seed, stdout);
         fwrite(xf->slots, xf->len, 1, stdout);
         free(xf);
@@ -56,16 +66,17 @@ main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        unsigned char header[4];
+        unsigned char header[5];
         if (!fread(header, sizeof(header), 1, f)) {
             fprintf(stderr, "fatal: cannot read %s\n", argv[1]);
             exit(EXIT_FAILURE);
         }
         unsigned long count = (unsigned long)header[0] <<  0 |
                               (unsigned long)header[1] <<  8 |
-                              (unsigned long)header[2] << 16;
+                              (unsigned long)header[2] << 16 |
+                              (unsigned long)header[3] << 24;
         struct xf8 *xf = xf8_create(count);
-        xf->seed = header[3];
+        xf->seed = header[4];
         if (!fread(xf->slots, xf->len, 1, f)) {
             fprintf(stderr, "fatal: cannot read %s\n", argv[1]);
             exit(EXIT_FAILURE);
