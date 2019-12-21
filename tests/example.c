@@ -1,11 +1,11 @@
 /* Probabilistic spell checker example using a xor filter */
+#include "../xf8.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string.h>
 #include <string.h>
-#include "xf8.h"
 
 #define MAXKEYS (1L<<24)
 
