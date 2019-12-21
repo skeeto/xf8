@@ -3,14 +3,51 @@
 #include <stdlib.h>
 #include "xf8.h"
 
+static uint64_t
+xf8_hash(uint64_t x)
+{
+    x ^= x >> 32;
+    x *= UINT64_C(0xc6629b183fbdc9a7);
+    x ^= x >> 32;
+    x *= UINT64_C(0xc029435c0845c0b3);
+    x ^= x >> 32;
+    return x;
+}
+
 /* Adjust this typedef as needed to control the maximum allowed number
  * of keys at the cost of higher memory usage. As a 32-bit integer, up
- * to 2^32 keys are supported, which will require 91GB of memory in
- * order to build the filter. Using a uint64_t allows for a larger
- * number of keys, but exactly doubles memory usage.
+ * to 2^32 keys are supported. Using a uint64_t allows for a larger
+ * number of keys, but roughly doubles total memory usage.
  */
+#ifndef XF8_64BIT
 typedef uint32_t fx8uint;
+static void
+xf8_index(const struct xf8 *xf, fx8uint c[3], uint64_t key)
+{
+    size_t len = xf->len / 3;
+    for (int i = 0; i < 3; i++) {
+        uint64_t x = (uint32_t)xf8_hash(key + xf->seed*3 + i);
+        c[i] = ((x*len)>>32) + len*i;
+    }
+}
+
+#else /* XF8_64BIT */
+typedef uint64_t fx8uint;
+static void
+xf8_index(const struct xf8 *xf, fx8uint c[3], uint64_t key)
+{
+    size_t len = xf->len / 3;
+    // TODO: avoid division by unknown denominator
+    c[0] = xf8_hash(key + xf->seed*3 + 0)%len + len*0;
+    c[1] = xf8_hash(key + xf->seed*3 + 1)%len + len*1;
+    c[2] = xf8_hash(key + xf->seed*3 + 2)%len + len*2;
+}
+#endif
+
 #define FX8NULL ((fx8uint)-1)
+
+/* Compute the 3-tuple of indices for KEY. */
+static void xf8_index(const struct xf8 *xf, fx8uint c[3], uint64_t key);
 
 struct xf8 *
 xf8_create(size_t count)
@@ -25,28 +62,6 @@ xf8_create(size_t count)
         }
     }
     return xf;
-}
-
-static uint64_t
-xf8_hash(uint64_t x)
-{
-    x ^= x >> 32;
-    x *= UINT64_C(0xc6629b183fbdc9a7);
-    x ^= x >> 32;
-    x *= UINT64_C(0xc029435c0845c0b3);
-    x ^= x >> 32;
-    return x;
-}
-
-/* Compute the 3-tuple of indices for KEY. */
-static void
-xf8_index(const struct xf8 *xf, fx8uint c[3], uint64_t key)
-{
-    size_t len = xf->len / 3;
-    // TODO: avoid division by unknown denominator
-    c[0] = xf8_hash(key + xf->seed*3 + 0)%len + len*0;
-    c[1] = xf8_hash(key + xf->seed*3 + 1)%len + len*1;
-    c[2] = xf8_hash(key + xf->seed*3 + 2)%len + len*2;
 }
 
 int

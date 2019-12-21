@@ -4,7 +4,17 @@ This is a C99 implementation of an 8-bit xor filter. It has a fixed
 error rate of 1/256 (~0.39%) and uses ~9.84 bits of storage per element.
 See [Xor Filters: Faster and Smaller Than Bloom Filters][ref].
 
-The example program is a probabilistic spell checker:
+## Memory Usage
+
+By default only up to 2^32 elements are supported, which will require
+123GB of memory to process. Much larger sets are supported by defining
+`XF8_64BIT` at compile time, at the cost of roughly doubling memory
+usage. For example, that same set of 2^32 elements will then require a
+total of 211GB of memory to process.
+
+## Example
+
+The example program (`tests/example.c`) is a probabilistic spell checker:
 
 ```
 $ make
