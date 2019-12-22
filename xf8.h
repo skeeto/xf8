@@ -10,10 +10,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if !defined(XF8_BITS) || XF8_BITS == 8
+typedef uint8_t xf8slot;
+#elif XF8_BITS == 16
+typedef uint16_t xf8slot;
+#endif
+
 struct xf8 {
     size_t len;
     int seed;
-    uint8_t slots[];
+    xf8slot slots[];
 };
 
 /**

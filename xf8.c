@@ -55,8 +55,8 @@ xf8_create(size_t count)
     struct xf8 *xf = 0;
     unsigned long long len = 123ULL*count/100 + 32;
     len += (3 - len % 3) % 3; // round up to divisible by 3
-    if (count < -1ULL/123 && len < (size_t)-1) {
-        xf = malloc(sizeof(struct xf8) + len);
+    if (count < -1ULL/123 && len*sizeof(xf8slot) < (size_t)-1) {
+        xf = malloc(sizeof(struct xf8) + len*sizeof(xf8slot));
         if (xf) {
             xf->len = len;
         }
@@ -162,7 +162,7 @@ xf8_populate(struct xf8 *xf, uint64_t *keys, size_t count)
                 fx8uint i = nodes[0][k];
                 fx8uint c[3];
                 xf8_index(xf, c, keys[k]);
-                unsigned char *b = xf->slots;
+                xf8slot *b = xf->slots;
                 xf->slots[i] = b[c[0]] ^ b[c[1]] ^ b[c[2]] ^ keys[k];
             }
             break;
@@ -182,6 +182,6 @@ xf8_member(const struct xf8 *xf, uint64_t key)
 {
     fx8uint c[3];
     xf8_index(xf, c, key);
-    const unsigned char *b = xf->slots;
-    return (unsigned char)key == (b[c[0]] ^ b[c[1]] ^ b[c[2]]);
+    const xf8slot *b = xf->slots;
+    return (xf8slot)key == (b[c[0]] ^ b[c[1]] ^ b[c[2]]);
 }

@@ -56,7 +56,7 @@ main(int argc, char *argv[])
         fputc(count >> 16 & 0xff, stdout);
         fputc(count >> 24 & 0xff, stdout);
         fputc(xf->seed, stdout);
-        fwrite(xf->slots, xf->len, 1, stdout);
+        fwrite(xf->slots, xf->len, sizeof(xf->slots[0]), stdout);
         free(xf);
 
         if (fflush(stdout)) {  // note: is not a 100% sufficient check
@@ -82,7 +82,7 @@ main(int argc, char *argv[])
                               (unsigned long)header[3] << 24;
         struct xf8 *xf = xf8_create(count);
         xf->seed = header[4];
-        if (!fread(xf->slots, xf->len, 1, f)) {
+        if (fread(xf->slots, sizeof(xf->slots[0]), xf->len, f) != xf->len) {
             fprintf(stderr, "fatal: cannot read %s\n", argv[1]);
             exit(EXIT_FAILURE);
         }
