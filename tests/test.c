@@ -52,7 +52,7 @@ test(uint64_t seed, long n)
     double rate = hit / (double)n;
     if (rate > 1.5/(sizeof(xf8slot)*8)) {
         static char tmp[256];
-        sprintf(tmp, "too many false positives: %.19g%%\n", rate*100);
+        sprintf(tmp, "too many false positives: %.17g%%\n", rate*100);
         return tmp;
     }
 
